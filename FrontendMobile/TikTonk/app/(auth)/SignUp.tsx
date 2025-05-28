@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Image, Text, View } from 'react-native';
-import Button from '../../components/Button';
+import Button1 from '../../components/Button1';
 import Input from '../../components/Input';
+import { useRouter } from 'expo-router';
 import "../../globals.css";
-
+const router = useRouter();
 const SignUp = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -12,6 +13,7 @@ const SignUp = () => {
   const handleSignup = () => {
     // Handle SignUp logic here
     console.log('SignUp ettempt:', { email, password })
+    router.push('/(auth)/Platforms-Accounts');
   }
 
   return (
@@ -47,7 +49,7 @@ const SignUp = () => {
         classname="mt-9"
       />
       
-      <Button title="SignUp" onPress={handleSignup} className='mt-14' />
+      <Button1 title="SignUp" onPress={handleSignup} className='mt-14' />
       
     </View>
   )

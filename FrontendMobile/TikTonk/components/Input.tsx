@@ -14,7 +14,7 @@ const Input = ({ label, value, onChangeText, secureTextEntry = false ,classname}
     <View className={`w-full my-2 ${classname || ''}`}>
       <Text className="mb-2 font-bold text-xl ">{label}:</Text>
       <TextInput
-        className="w-full h-[50px] bg-gray-50 rounded-lg px-4 text-base border-[1px]"
+        className="w-full h-[50px] bg-gray-200 rounded-[15px] px-4 text-base border-[0px]"
         value={value}
         onChangeText={onChangeText}
         secureTextEntry={secureTextEntry}

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Image, Text, View } from 'react-native';
-import Button from '../../components/Button';
+import Button1 from '../../components/Button1';
 import Input from '../../components/Input';
 import "../../globals.css";
 import { useRouter } from 'expo-router';
 
-const LogIn = () => {
+const PlatAcc = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const router = useRouter();
@@ -40,7 +40,7 @@ const LogIn = () => {
         classname="mt-9"
       />
       
-      <Button title="Login" onPress={handleLogin} className='mt-14' />
+      <Button1 title="Login" onPress={handleLogin} className='mt-14' />
       
       <View className="flex-row justify-center mt-5">
         <Text className="mr-1">Don't have an Account?</Text>
@@ -51,5 +51,5 @@ const LogIn = () => {
   )
 }
 
-export default LogIn
+export default PlatAcc
 
