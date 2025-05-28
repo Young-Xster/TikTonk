@@ -3,16 +3,15 @@ import { Image, Text, View } from 'react-native';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import "../../globals.css";
-import { useRouter } from 'expo-router';
 
 const LogIn = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const router = useRouter();
+  const [confirmPassword, setConfirmPassword] = useState('')
 
-  const handleLogin = () => {
+  const handleSignup = () => {
     // Handle login logic here
-    console.log('Login attempted with:', { email, password })
+    console.log('SignUp ettempt:', { email, password })
   }
 
   return (
@@ -40,13 +39,16 @@ const LogIn = () => {
         classname="mt-9"
       />
       
-      <Button title="Login" onPress={handleLogin} className='mt-14' />
+      <Input
+        label="Conferm Password"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+        classname="mt-9"
+      />
       
-      <View className="flex-row justify-center mt-5">
-        <Text className="mr-1">Don't have an Account?</Text>
-        <Text className="text-green-400" onPress={() => router.push('/(auth)/SignUp')}>SignUp</Text>
-        
-      </View>
+      <Button title="SignUp" onPress={handleSignup} className='mt-14' />
+      
     </View>
   )
 }

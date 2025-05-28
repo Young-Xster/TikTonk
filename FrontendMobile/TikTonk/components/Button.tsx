@@ -13,7 +13,7 @@ const Button = ({ title, onPress, className }: ButtonProps) => {
       className={`w-full h-[50px] bg-green-400 rounded-lg justify-center items-center my-2 ${className || ''}`} 
       onPress={onPress}
     >
-      <Text className="text-black text-base font-semibold italic">
+      <Text className="text-black text-2xl font-semibold italic ">
         {title}
       </Text>
     </TouchableOpacity>
