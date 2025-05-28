@@ -4,13 +4,13 @@ import Button from '../../components/Button';
 import Input from '../../components/Input';
 import "../../globals.css";
 
-const LogIn = () => {
+const SignUp = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
   const handleSignup = () => {
-    // Handle login logic here
+    // Handle SignUp logic here
     console.log('SignUp ettempt:', { email, password })
   }
 
@@ -53,5 +53,5 @@ const LogIn = () => {
   )
 }
 
-export default LogIn
+export default SignUp
 
