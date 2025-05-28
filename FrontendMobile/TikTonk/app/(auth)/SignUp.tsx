@@ -7,14 +7,67 @@ import "../../globals.css";
 const router = useRouter();
 const SignUp = () => {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const [password1, setPassword1] = useState('')
+  const [password2, setPassword2] = useState('')
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignup = () => {
-    // Handle SignUp logic here
-    console.log('SignUp ettempt:', { email, password })
-    router.push('/(auth)/Platforms-Accounts');
-  }
+  const handleSignUp = async () => {
+   
+    // Validation checks
+    if (!email || !password1 || !password2) {
+      setError("Please fill in all fields");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError("Please enter a valid email address");
+      setIsLoading(false);
+      return;
+    }
+
+    if (password1.length < 8) {
+      setError("Password must be at least 8 characters long");
+      setIsLoading(false);
+      return;
+    }
+
+    if (password1 !== password2) {
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("https://your-backend-url/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password1,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        
+        localStorage.setItem("token", data.token); 
+        window.location.href = "/login"; 
+      } else {
+        // Account creation failed
+        setError(data.message || "Failed to create account. Please try again.");
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      setError("Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <View className="flex-1 p-5 bg-white">
@@ -35,21 +88,21 @@ const SignUp = () => {
       
       <Input
         label="Password"
-        value={password}
-        onChangeText={setPassword}
+        value={password1}
+        onChangeText={setPassword1}
         secureTextEntry
         classname="mt-9"
       />
       
       <Input
         label="Conferm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
+        value={password2}
+        onChangeText={setPassword2}
         secureTextEntry
         classname="mt-9"
       />
       
-      <Button1 title="SignUp" onPress={handleSignup} className='mt-14' />
+      <Button1 title="SignUp" onPress={handleSignUp} className='mt-14' />
       
     </View>
   )

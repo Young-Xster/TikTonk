@@ -21,6 +21,7 @@ const LogIn = () => {
     console.log("TikTok Login Attempt:", { emailTikTok, passwordTikTok });
     console.log("Instagram Login Attempt:", { emailIG, passwordIG });
     console.log("YouTube Shorts Login Attempt:", { emailYTs, passwordYTs });
+    
   }
 
   return (

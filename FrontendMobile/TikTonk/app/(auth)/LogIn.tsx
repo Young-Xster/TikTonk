@@ -8,11 +8,41 @@ import { useRouter } from 'expo-router';
 const PlatAcc = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Handle login logic here
     console.log('Login attempted with:', { email, password })
+     try {
+      const response = await fetch("http://your-backend-url/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Login successful - redirect to user page
+        localStorage.setItem("token", data.token); // Store auth token if provided
+        window.location.href = "/dashboard"; // Or use React Router: navigate("/dashboard")
+      } else {
+        // Login failed - show error message
+        setError(data.message || "Invalid email or password");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Network error. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
