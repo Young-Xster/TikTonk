@@ -62,7 +62,6 @@ export default function Navigation() {
     textDecoration: "none",
     transition: "color 0.2s",
     fontSize: "1.2rem",
-    
   };
 
   const loginButtonStyle = {
@@ -90,6 +89,13 @@ export default function Navigation() {
     whiteSpace: "nowrap",
     minWidth: "fit-content",
     fontSize: "1rem",
+  };
+
+  const handleLogin = () => {
+    window.location.href = "/login";
+  };
+  const handleSignup = () => {
+    window.location.href = "/signup";
   };
 
   return (
@@ -128,6 +134,7 @@ export default function Navigation() {
             style={loginButtonStyle}
             onMouseEnter={(e) => (e.target.style.backgroundColor = "#f9fafb")}
             onMouseLeave={(e) => (e.target.style.backgroundColor = "white")}
+            onClick={handleLogin}
           >
             Log In
           </button>
@@ -137,6 +144,7 @@ export default function Navigation() {
             style={signupButtonStyle}
             onMouseEnter={(e) => (e.target.style.backgroundColor = "#047857")}
             onMouseLeave={(e) => (e.target.style.backgroundColor = "#059669")}
+            onClick={handleSignup}
           >
             Sign Up
           </button>

@@ -7,7 +7,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // All your existing styles...
+  
   const sectionStyle = {
     display: "flex",
     minHeight: "100vh",

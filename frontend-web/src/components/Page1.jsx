@@ -56,6 +56,7 @@ export default function Page1() {
     maxWidth: "1000px",
     height: "auto",
   };
+  
 
   return (
     <section className="intro" style={sectionStyle}>
