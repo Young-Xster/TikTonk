@@ -1,12 +1,21 @@
+import React, { useEffect, useRef } from "react";
 import logo from "../assets/logo.png";
 
 export default function Navigation() {
+  const navRef = useRef(null);
+
   const parentStyle = {
     display: "grid",
     gridTemplateColumns: "repeat(9, 1fr)",
     gridColumnGap: "0px",
     gridRowGap: "0px",
     borderBottom: "1px solid #000000",
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: "white",
+    zIndex: 1000,
   };
 
   const div1Style = {
@@ -56,12 +65,12 @@ export default function Navigation() {
     marginRight: "100px",
   };
 
-  // Inline styles as fallback
   const linkStyle = {
-    color: "#374151", // gray-700
+    color: "#374151",
     textDecoration: "none",
     transition: "color 0.2s",
     fontSize: "1.2rem",
+    cursor: "pointer",
   };
 
   const loginButtonStyle = {
@@ -91,6 +100,37 @@ export default function Navigation() {
     fontSize: "1rem",
   };
 
+  useEffect(() => {
+    const navElement = navRef.current;
+    let animationFrameId;
+
+    if (navElement) {
+      const setBodyPadding = () => {
+        const navbarHeight = navElement.offsetHeight;
+        if (navbarHeight > 0) {
+          document.body.style.paddingTop = `${navbarHeight}px`;
+        }
+      };
+
+      animationFrameId = requestAnimationFrame(() => {
+        setBodyPadding();
+      });
+
+      const handleResize = () => {
+        setBodyPadding();
+      };
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+        }
+        document.body.style.paddingTop = "0px";
+        window.removeEventListener("resize", handleResize);
+      };
+    }
+  }, []);
+
   const handleLogin = () => {
     window.location.href = "/login";
   };
@@ -98,8 +138,24 @@ export default function Navigation() {
     window.location.href = "/signup";
   };
 
+  const handleSmoothScroll = (event, targetId) => {
+    event.preventDefault();
+    const targetElement = document.getElementById(targetId);
+    if (targetElement && navRef.current) {
+      const navbarHeight = navRef.current.offsetHeight || 0;
+      const elementPosition =
+        targetElement.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - navbarHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
-    <nav>
+    <nav ref={navRef}>
       <div style={parentStyle}>
         <div style={div1Style}>
           <img
@@ -110,22 +166,38 @@ export default function Navigation() {
           <h2 style={{ fontWeight: "bold" }}>TikTonik</h2>
         </div>
         <div style={div2Style}>
-          <a href="#" style={linkStyle}>
+          <a
+            href="#explanation"
+            style={linkStyle}
+            onClick={(e) => handleSmoothScroll(e, "explanation")}
+          >
             Features
           </a>
         </div>
         <div style={div3Style}>
-          <a href="#" style={linkStyle}>
+          <a
+            href="#pricing"
+            style={linkStyle}
+            onClick={(e) => handleSmoothScroll(e, "pricing")}
+          >
             Pricing
           </a>
         </div>
         <div style={div4Style}>
-          <a href="#" style={linkStyle}>
+          <a
+            href="#sources"
+            style={linkStyle}
+            onClick={(e) => handleSmoothScroll(e, "sources")}
+          >
             Sources
           </a>
         </div>
         <div style={div5Style}>
-          <a href="#" style={linkStyle}>
+          <a
+            href="#contact"
+            style={linkStyle}
+            onClick={(e) => handleSmoothScroll(e, "contact")}
+          >
             Contact Us
           </a>
         </div>
