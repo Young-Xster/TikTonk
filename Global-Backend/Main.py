@@ -1,0 +1,8 @@
+from appwrite.client import Client
+from appwrite.services.databases import Databases
+from appwrite.id import ID
+
+client = Client()
+client.set_endpoint('https://fra.cloud.appwrite.io/v1')
+client.set_project('683ae50200343d8107c3')
+client.set_key('standard_d195c12cb6f7b1fe7688ef34ad457792225295c00732567d07c242f53024e214971e88bd17f8a3aea357c0b69db4e34b10372f5c408d0b51f1926517967177c97d340c346c64f590fec6263d844116e546eba8130d7180d1bd280d158a6f12756dcff885445ad1f54e164cd2cf39499d3712825c1b49bc1547cb991700b200bd')
