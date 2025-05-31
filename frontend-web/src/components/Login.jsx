@@ -1,5 +1,7 @@
+// filepath: /home/young-xster/codes/repos/TikTonk/frontend-web/src/components/Login.jsx
 import logo from "../assets/logo.png";
 import { useState } from "react";
+import { login as appwriteLogin } from "../lib/appwrite.js"; // Adjusted path
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -134,7 +136,6 @@ export default function Login() {
     margin: "20px 0",
   };
 
-  // Error message style
   const errorStyle = {
     color: "#e74c3c",
     fontSize: "14px",
@@ -149,30 +150,14 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://your-backend-url/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        // Login successful - redirect to user page
-        localStorage.setItem("token", data.token); // Store auth token if provided
-        window.location.href = "/dashboard"; // Or use React Router: navigate("/dashboard")
-      } else {
-        // Login failed - show error message
-        setError(data.message || "Invalid email or password");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      setError("Network error. Please try again.");
+     
+      const session = await appwriteLogin(email, password);
+      console.log("Login successful:", session);
+      
+      window.location.href = "/dashboard"; 
+    } catch (err) {
+      
+      setError(err.message || "Invalid email or password. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -203,7 +188,7 @@ export default function Login() {
 
           <input
             type="email"
-            placeholder="Email address or phone number"
+            placeholder="Email address"
             style={inputStyle}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
