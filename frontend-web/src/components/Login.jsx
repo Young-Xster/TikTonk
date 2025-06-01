@@ -1,7 +1,7 @@
 // filepath: /home/young-xster/codes/repos/TikTonk/frontend-web/src/components/Login.jsx
 import logo from "../assets/logo.png";
 import { useState } from "react";
-import { login as appwriteLogin } from "../lib/appwrite.js"; // Adjusted path
+import { login as appwriteLogin } from "../lib/appwrite"; // Adjusted path
 
 export default function Login() {
   const [email, setEmail] = useState("");
