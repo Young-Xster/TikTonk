@@ -1,9 +1,8 @@
-import { Client, Account, ID, Databases } from "appwrite";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import { Account, Client, Databases, ID } from "appwrite";
 
 const client = new Client()
-    .setEndpoint('https://fra.cloud.appwrite.io/v1') // Your Appwrite Endpoint  
-    .setProject('683ae50200343d8107c3') // Your project ID
+    .setEndpoint('https://fra.cloud.appwrite.io/v1')
+    .setProject('683ae50200343d8107c3');
 const databases = new Databases(client);
 const account = new Account(client);
 

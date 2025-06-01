@@ -1,15 +1,17 @@
-// filepath: /home/young-xster/codes/repos/TikTonk/frontend-web/src/components/Login.jsx
 import logo from "../assets/logo.png";
 import { useState } from "react";
-import { login as appwriteLogin } from "../lib/appwrite"; // Adjusted path
+import { login as appwriteLogin, getCurrentUser } from "../lib/appwrite.js";
+import { useUser } from "../context/UserContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { setCurrentUser } = useUser(); // Get setCurrentUser from context
+  const navigate = useNavigate(); // For programmatic navigation
 
-  
   const sectionStyle = {
     display: "flex",
     minHeight: "100vh",
@@ -150,13 +152,11 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-     
-      const session = await appwriteLogin(email, password);
-      console.log("Login successful:", session);
-      
-      window.location.href = "/dashboard"; 
+      await appwriteLogin(email, password); // Login
+      const user = await getCurrentUser(); // Fetch user details after login
+      setCurrentUser(user); // Update context
+      navigate("/dashboard"); // Navigate to dashboard
     } catch (err) {
-      
       setError(err.message || "Invalid email or password. Please try again.");
     } finally {
       setIsLoading(false);
@@ -164,12 +164,11 @@ export default function Login() {
   };
 
   const handleSignUp = () => {
-    window.location.href = "/signup";
+    navigate("/signup"); // Use navigate for internal routing
   };
 
   return (
     <section style={sectionStyle}>
-      {/* Left Side - Logo and App Info */}
       <div style={leftSideStyle}>
         <div style={logoContainerStyle}>
           <img src={logo} alt="TikTonik Logo" style={logoStyle} />
@@ -181,7 +180,6 @@ export default function Login() {
         </p>
       </div>
 
-      {/* Right Side - Login Form */}
       <div style={rightSideStyle}>
         <form style={formStyle} onSubmit={handleLogin}>
           <h2 style={titleStyle}>Log in to TikTonik</h2>
