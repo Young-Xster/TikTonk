@@ -1,8 +1,8 @@
 import logo from "../assets/logo.png";
 import { useState } from "react";
 import { login as appwriteLogin, getCurrentUser } from "../lib/appwrite.js";
-import { useUser } from "../context/UserContext.jsx"; // Import useUser
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useUser } from "../context/UserContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");

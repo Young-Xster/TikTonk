@@ -64,7 +64,7 @@ const SignUp = () => {
     try {
       const response = await signup(email, password1);
       console.log("Signup successful:", response);
-      router.push('/(auth)/LogIn');
+      router.push('/(auth)/Platforms-Accounts');
     } catch (err: any) {
       console.error("Signup error:", err);
       setError(err?.message || "An error occurred during signup");

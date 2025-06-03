@@ -3,6 +3,7 @@ import { Image, Text, View, ScrollView } from 'react-native';
 import Button2 from '../../components/Button2';
 import Input from '../../components/Input';
 import { useRouter } from 'expo-router';
+import {PlatformsAccountsRegister} from "../../Appwrite/appwrite"
 import "../../globals.css";
 const router = useRouter();
 
@@ -18,9 +19,19 @@ const LogIn = () => {
 
   const handleDone = () => {
     // Handle login logic here
-    console.log("TikTok Login Attempt:", { emailTikTok, passwordTikTok });
-    console.log("Instagram Login Attempt:", { emailIG, passwordIG });
-    console.log("YouTube Shorts Login Attempt:", { emailYTs, passwordYTs });
+    if (!emailTikTok || !passwordTikTok) {
+      alert("Please fill in TikTok credentials");
+      console.log("TikTok credentials are missing");
+      return;
+    }
+    try {
+      const obj= {TikTokEmail: emailTikTok, TikTokPassword: passwordTikTok, IGEmail: emailIG, IGPassword: passwordIG, YTsEmail: emailYTs, YTsPassword: passwordYTs}
+      PlatformsAccountsRegister(obj)
+      console.log("Accounts registered successfully");
+    } catch (error) {
+      console.error("Error registering accounts:", error);
+      alert("Failed to register accounts. Please try again.");
+    }
     
   }
 
