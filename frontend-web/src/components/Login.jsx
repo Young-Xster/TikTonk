@@ -152,10 +152,10 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      await appwriteLogin(email, password); // Login
-      const user = await getCurrentUser(); // Fetch user details after login
-      setCurrentUser(user); // Update context
-      navigate("/dashboard"); // Navigate to dashboard
+      await appwriteLogin(email, password); 
+      const user = await getCurrentUser(); 
+      setCurrentUser(user); 
+      navigate("/dashboard"); 
     } catch (err) {
       setError(err.message || "Invalid email or password. Please try again.");
     } finally {
@@ -164,7 +164,7 @@ export default function Login() {
   };
 
   const handleSignUp = () => {
-    navigate("/signup"); // Use navigate for internal routing
+    navigate("/signup"); 
   };
 
   return (
