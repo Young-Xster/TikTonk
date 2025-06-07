@@ -1,15 +1,16 @@
 import React from "react";
-import { Navigate , Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useUser } from "../context/UserContext.jsx";
+import Loading from "./Loading.jsx";
 
-const ProtectedRoute = () => {
-    const { currentUser, isLoading } = useUser();
+const ProtectedRoute = ({ children }) => {
+  const { currentUser, isLoading } = useUser();
 
-    if(isLoading){
-        return <div>Loading...</div>;
-    }
+  if (isLoading) {
+    return <Loading />;
+  }
 
-    return currentUser ? <Outlet /> : <Navigate to="/login" replace />;
-}
+  return currentUser ? children : <Navigate to="/login" replace />;
+};
 
 export default ProtectedRoute;
