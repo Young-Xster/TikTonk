@@ -207,6 +207,32 @@ export default function Dashboard() {
     letterSpacing: "0.5px",
   };
 
+  const floatingButtonStyle = {
+    position: "fixed",
+    bottom: "5rem",
+    right: "5rem",
+    width: "60px",
+    height: "60px",
+    borderRadius: "50%",
+    background: "linear-gradient(135deg, #ff0050 0%, #ff6b35 100%)",
+    color: "#ffffff",
+    border: "none",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "1.5rem",
+    fontWeight: "bold",
+    boxShadow: "0 8px 20px rgba(255, 0, 80, 0.3)",
+    transition: "all 0.3s ease",
+    zIndex: 1000,
+    transform: "translateY(0)",
+  };
+
+  const handleCreateRedirect = () => {
+    window.location.href = "/create";
+  };
+
   const formatNumber = (num) => {
     if (!num) return "0";
     if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
@@ -274,8 +300,6 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
-
-      {/* Profile Section */}
       <div style={profileSectionStyle}>
         <img src={UserPfp} alt="User Profile" style={profileImageStyle} />
 
@@ -288,7 +312,6 @@ export default function Dashboard() {
         </h1>
         <p style={emailStyle}>{currentUser?.email}</p>
 
-        {/* Stats Section */}
         <div style={statsContainerStyle}>
           <div style={statItemStyle}>
             <div style={statNumberStyle}>{formatNumber(userStats?.Views)}</div>
@@ -312,13 +335,10 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* Videos Section */}
       <div style={videosSectionStyle}>
         <h2 style={sectionTitleStyle}>Your Videos</h2>
         <div style={videosGridStyle}>{videoPlaceholders}</div>
       </div>
-
       {error && (
         <div
           style={{
@@ -335,6 +355,22 @@ export default function Dashboard() {
           {error}
         </div>
       )}
+      <button
+        style={floatingButtonStyle}
+        onClick={handleCreateRedirect}
+        onMouseEnter={(e) => {
+          e.target.style.transform = "translateY(-3px) scale(1.1)";
+          e.target.style.boxShadow = "0 12px 25px rgba(255, 0, 80, 0.4)";
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.transform = "translateY(0) scale(1)";
+          e.target.style.boxShadow = "0 8px 20px rgba(255, 0, 80, 0.3)";
+        }}
+        title="Create new content"
+      >
+        +
+      </button>
+      ;
     </div>
   );
 }

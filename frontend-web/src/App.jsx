@@ -18,6 +18,7 @@ import Youtube from "./components/Youtube.jsx";
 import Facebook from "./components/Facebook.jsx";
 import Loading from "./components/Loading.jsx";
 import Footer from "./components/Footer.jsx";
+import Create from "./components/Create.jsx";
 import "./App.css";
 
 function PublicRoute({ children }) {
@@ -112,6 +113,15 @@ function AppContent() {
         element={
           <ProtectedRoute>
             <Youtube />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/Create"
+        element={
+          <ProtectedRoute>
+            <Create />
           </ProtectedRoute>
         }
       />
