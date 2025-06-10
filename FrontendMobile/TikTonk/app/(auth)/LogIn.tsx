@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Image, Text, View } from 'react-native';
 import Button1 from '../../components/Button1';
 import Input from '../../components/Input';
+import { login,logout } from '@/Appwrite/appwrite';
 import "../../globals.css";
 import { useRouter } from 'expo-router';
+import { Client, Account } from "appwrite";
 
-const PlatAcc = () => {
+const logIn = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState("");
@@ -13,36 +15,20 @@ const PlatAcc = () => {
   const router = useRouter();
 
   const handleLogin = async () => {
-    // Handle login logic here
-    console.log('Login attempted with:', { email, password })
-     try {
-      const response = await fetch("http://your-backend-url/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
+    
+    login(email, password)
+      .then((response) => {
+        console.log("Login successful");
+        router.push('/(taps)/Home');
+      })
+      .catch((error) => {
+        console.error("Login failed:", error);
+        setError(error.message || "An error occurred during login.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+        logout()
       });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        // Login successful - redirect to user page
-        localStorage.setItem("token", data.token); // Store auth token if provided
-        window.location.href = "/dashboard"; // Or use React Router: navigate("/dashboard")
-      } else {
-        // Login failed - show error message
-        setError(data.message || "Invalid email or password");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      setError("Network error. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
   }
 
   return (
@@ -81,5 +67,5 @@ const PlatAcc = () => {
   )
 }
 
-export default PlatAcc
+export default logIn
 
