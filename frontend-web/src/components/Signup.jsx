@@ -1,5 +1,7 @@
 import logo from "../assets/logo.png";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { signup as appwriteSignup } from "../lib/appwrite";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -7,6 +9,7 @@ export default function Signup() {
   const [password2, setPassword2] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const sectionStyle = {
     display: "flex",
@@ -159,36 +162,21 @@ export default function Signup() {
     }
 
     try {
-      const response = await fetch("https://your-backend-url/api/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password1,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        
-        localStorage.setItem("token", data.token); 
-        window.location.href = "/login"; 
-      } else {
-        // Account creation failed
-        setError(data.message || "Failed to create account. Please try again.");
-      }
+      // Call the Appwrite signup function
+      await appwriteSignup(email, password1);
+      // Optionally, you can log the user in directly or show a success message
+      // For now, let's redirect to login page after successful signup
+      navigate("/login");
     } catch (error) {
       console.error("Signup error:", error);
-      setError("Network error. Please try again.");
+      setError(error.message || "Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleLogin = () => {
+    // navigate("/login"); // Use navigate for consistency
     window.location.href = "/login";
   };
 
