@@ -5,6 +5,7 @@ import Input from '../../components/Input';
 import { useRouter } from 'expo-router';
 import {PlatformsAccountsRegister} from "../../Appwrite/appwrite"
 import "../../globals.css";
+import { replace } from 'expo-router/build/global-state/routing';
 const router = useRouter();
 
 const LogIn = () => {
@@ -22,12 +23,14 @@ const LogIn = () => {
     if (!emailTikTok || !passwordTikTok) {
       alert("Please fill in TikTok credentials");
       console.log("TikTok credentials are missing");
+      
       return;
     }
     try {
       const obj= {TikTokEmail: emailTikTok, TikTokPassword: passwordTikTok, IGEmail: emailIG, IGPassword: passwordIG, YTsEmail: emailYTs, YTsPassword: passwordYTs}
       PlatformsAccountsRegister(obj)
       console.log("Accounts registered successfully");
+      router.push("/(taps)/Home")
     } catch (error) {
       console.error("Error registering accounts:", error);
       alert("Failed to register accounts. Please try again.");
