@@ -162,10 +162,8 @@ export default function Signup() {
     }
 
     try {
-      // Call the Appwrite signup function
       await appwriteSignup(email, password1);
-      // Optionally, you can log the user in directly or show a success message
-      // For now, let's redirect to login page after successful signup
+
       navigate("/login");
     } catch (error) {
       console.error("Signup error:", error);
@@ -176,7 +174,6 @@ export default function Signup() {
   };
 
   const handleLogin = () => {
-    // navigate("/login"); // Use navigate for consistency
     window.location.href = "/login";
   };
 
@@ -233,6 +230,20 @@ export default function Signup() {
           />
 
           {error && <div style={errorStyle}>{error}</div>}
+
+          <div>
+            <input
+              type="checkbox"
+              id="terms"
+              style={{ marginRight: "8px" }}
+              required
+            />
+            <label htmlFor="terms">
+              By signing up, you agree to our{" "}
+              <a href="/terms">Terms and Conditions</a> and{" "}
+              <a href="/privacy">Privacy Policy</a>.
+            </label>
+          </div>
 
           <button
             type="submit"

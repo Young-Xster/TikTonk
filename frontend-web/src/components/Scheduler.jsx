@@ -16,7 +16,7 @@ export default function Scheduler({
     moment().format("YYYY-MM-DD")
   );
 
-  // Reset daily picks every 24 hours for free users
+
   useEffect(() => {
     const currentDate = moment().format("YYYY-MM-DD");
     if (!isPremium && currentDate !== lastResetDate) {
@@ -25,11 +25,11 @@ export default function Scheduler({
     }
   }, [isPremium, lastResetDate]);
 
-  // Generate hourly time slots for a given date
+  
   const generateTimeSlots = (date) => {
     const slots = [];
-    const startHour = 6; // Start from 6 AM
-    const endHour = 23; // End at 11 PM
+    const startHour = 6; 
+    const endHour = 23; 
 
     for (let hour = startHour; hour <= endHour; hour++) {
       const timeSlot = moment(date).hour(hour).minute(0).second(0);
@@ -46,7 +46,7 @@ export default function Scheduler({
     const selectedDate = moment(start).format("YYYY-MM-DD");
     const today = moment().format("YYYY-MM-DD");
 
-    // For free users, only allow current day
+  
     if (!isPremium && selectedDate !== today) {
       alert(
         "Free users can only schedule for today. Upgrade to Premium to schedule for the entire month!"
@@ -54,7 +54,7 @@ export default function Scheduler({
       return;
     }
 
-    // Check daily limits
+
     const currentPickCount = dailyPickCounts[selectedDate] || 0;
     const userLimit = isPremium ? 5 : 2;
 
@@ -65,7 +65,7 @@ export default function Scheduler({
       return;
     }
 
-    // For free users, show ad on second pick
+
     if (!isPremium && currentPickCount === 1) {
       const watchAd = window.confirm(
         "Watch an ad to confirm this second pick of the day?"
