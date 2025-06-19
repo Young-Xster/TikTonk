@@ -19,6 +19,8 @@ import Facebook from "./components/Facebook.jsx";
 import Loading from "./components/Loading.jsx";
 import Footer from "./components/Footer.jsx";
 import Create from "./components/Create.jsx";
+import Terms from "./components/Terms.jsx";
+import Privacy from "./components/Privacy.jsx";
 import "./App.css";
 
 function PublicRoute({ children }) {
@@ -125,6 +127,8 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

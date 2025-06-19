@@ -382,7 +382,7 @@ export default function Page1() {
     fontWeight: "600",
     textDecoration: "none",
     display: "inline-block",
-    marginTop: "auto", // Pushes button to the bottom if box heights vary
+    marginTop: "auto",
     transition: "background-color 0.2s ease-out",
   };
 
@@ -399,9 +399,10 @@ export default function Page1() {
       price: "$0",
       duration: "Always Free",
       features: [
-        "10 Video Exports/Month",
+        "2 Videos per day",
         "Basic Trend Analysis",
-        "Limited Source Access",
+        "Limited Functionality",
+        "Standard Quality Exports",
         "Community Support",
       ],
       buttonText: "Get Started",
@@ -412,8 +413,8 @@ export default function Page1() {
       price: "$9.99",
       duration: "per month",
       features: [
-        "50 Video Exports/Month",
-        "Standard Trend Analysis",
+        "5 videos per day",
+        "Advanced Trend Analysis",
         "All Core Sources",
         "Email Support",
         "HD Quality Exports",
@@ -426,11 +427,11 @@ export default function Page1() {
       price: "$24.99",
       duration: "per 3 months",
       features: [
-        "180 Video Exports/3 Months",
+        "5 videos per day",
         "Advanced Trend Analysis",
         "All Sources + Early Access",
         "Priority Email Support",
-        "4K Quality Exports",
+        "HD Quality Exports",
       ],
       buttonText: "Choose Plan",
       isPopular: false,
@@ -440,11 +441,11 @@ export default function Page1() {
       price: "$69.99",
       duration: "per year",
       features: [
-        "Unlimited Video Exports",
+        "5 Videos per day",
         "Premium Trend Analysis",
-        "All Sources + Custom Requests",
-        "Dedicated Support Manager",
-        "4K & Commercial License",
+        "All Sources + Early Access",
+        "Priority Email Support",
+        "HD Quality Exports",
       ],
       buttonText: "Choose Plan",
       isPopular: false,

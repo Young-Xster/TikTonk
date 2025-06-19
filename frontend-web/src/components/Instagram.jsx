@@ -1,29 +1,79 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "../context/UserContext.jsx";
 import instagramLogo from "../assets/instagram.png";
 
 export default function Instagram() {
-  const { currentUser, isLoading, userDoc } = useUser();
-  const [accounts, setAccounts] = useState([]);
-  const [primaryAccount, setPrimaryAccount] = useState({
-    email: "",
-    password: "",
-  });
-  const handleAdd = () => {
-    if (!userDoc?.Premium || accounts.length >= 4) return;
-    setAccounts((prev) => [...prev, { email: "", password: "" }]);
+  const { currentUser, userDoc } = useUser();
+  const [connectedAccounts, setConnectedAccounts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Instagram OAuth configuration
+  const INSTAGRAM_CLIENT_ID = import.meta.env.VITE_INSTAGRAM_CLIENT_ID; // Use the App ID from your Meta dashboard
+  const REDIRECT_URI = `${window.location.origin}/auth/instagram/callback`;
+  const SCOPE = "user_profile,user_media,instagram_content_publish";
+
+  useEffect(() => {
+    fetchConnectedAccounts();
+  }, [currentUser]);
+
+  const fetchConnectedAccounts = async () => {
+    if (!currentUser) return;
+
+    try {
+      // Fetch user's connected Instagram accounts from your database
+      const accounts = await getConnectedAccounts(currentUser.$id, "instagram");
+      setConnectedAccounts(accounts);
+    } catch (error) {
+      console.error("Failed to fetch connected accounts:", error);
+    }
   };
 
-  const handleAccountChange = (index, field) => (e) => {
-    const updated = [...accounts];
-    updated[index][field] = e.target.value;
-    setAccounts(updated);
+  const handleConnectInstagram = () => {
+    if (!userDoc?.Premium && connectedAccounts.length >= 1) {
+      alert("Premium required to connect multiple Instagram accounts");
+      return;
+    }
+
+    if (connectedAccounts.length >= 5) {
+      alert("Maximum 5 Instagram accounts allowed per platform");
+      return;
+    }
+
+    // Create state parameter for security
+    const state = encodeURIComponent(
+      JSON.stringify({
+        userId: currentUser.$id,
+        platform: "instagram",
+        timestamp: Date.now(),
+      })
+    );
+
+    // Instagram OAuth URL - using the App ID from your Meta dashboard (1227240252211915)
+    const authUrl =
+      `https://api.instagram.com/oauth/authorize` +
+      `?client_id=${INSTAGRAM_CLIENT_ID || "1227240252211915"}` +
+      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+      `&scope=${SCOPE}` +
+      `&response_type=code` +
+      `&state=${state}`;
+
+    console.log("Redirecting to Instagram OAuth:", authUrl);
+    window.location.href = authUrl;
   };
 
-  const handlePrimaryAccountChange = (field) => (e) => {
-    setPrimaryAccount((prev) => ({ ...prev, [field]: e.target.value }));
+  const handleDisconnectAccount = async (accountId) => {
+    try {
+      setIsLoading(true);
+      await disconnectAccount(accountId);
+      await fetchConnectedAccounts();
+    } catch (error) {
+      console.error("Failed to disconnect account:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // Styles
   const containerStyle = {
     minHeight: "100vh",
     background: "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)",
@@ -50,7 +100,7 @@ export default function Instagram() {
   const titleStyle = {
     fontSize: "2.5rem",
     fontWeight: "700",
-    background: "black",
+    background: "linear-gradient(135deg, #E1306C 0%, #F56040 100%)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     backgroundClip: "text",
@@ -80,41 +130,12 @@ export default function Instagram() {
     marginTop: "0.5rem",
   };
 
-  const formGroupStyle = {
-    marginBottom: "2rem",
-  };
-
-  const labelStyle = {
-    display: "block",
-    fontSize: "1rem",
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: "0.5rem",
-  };
-
-  const inputStyle = {
-    width: "100%",
-    padding: "0.875rem 1rem",
-    border: "2px solid #e5e7eb",
-    borderRadius: "12px",
-    fontSize: "1rem",
-    transition: "all 0.3s ease",
-    background: "#ffffff",
-    outline: "none",
-    boxSizing: "border-box",
-  };
-
-  const inputFocusStyle = {
-    borderColor: "#667eea",
-    boxShadow: "0 0 0 3px rgba(102, 126, 234, 0.1)",
-  };
-
   const accountCardStyle = {
     background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
     border: "2px solid #e5e7eb",
     borderRadius: "16px",
     padding: "1.5rem",
-    marginTop: "1rem",
+    marginBottom: "1rem",
     position: "relative",
   };
 
@@ -122,30 +143,12 @@ export default function Instagram() {
     position: "absolute",
     top: "-12px",
     left: "20px",
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "linear-gradient(135deg, #E1306C 0%, #F56040 100%)",
     color: "#ffffff",
     padding: "0.25rem 0.75rem",
     borderRadius: "12px",
     fontSize: "0.75rem",
     fontWeight: "700",
-  };
-
-  const buttonStyle = {
-    width: "100%",
-    padding: "1rem 1.5rem",
-    borderRadius: "12px",
-    border: "none",
-    fontSize: "1rem",
-    fontWeight: "600",
-    cursor: userDoc?.Premium && accounts.length < 4 ? "pointer" : "not-allowed",
-    transition: "all 0.3s ease",
-    marginTop: "1.5rem",
-    background:
-      userDoc?.Premium && accounts.length < 4
-        ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-        : "#9ca3af",
-    color: "#ffffff",
-    transform: "translateY(0)",
   };
 
   const connectButtonStyle = {
@@ -155,12 +158,33 @@ export default function Instagram() {
     border: "none",
     fontSize: "1rem",
     fontWeight: "600",
-    cursor: "pointer",
+    cursor:
+      !isLoading &&
+      (userDoc?.Premium || connectedAccounts.length === 0) &&
+      connectedAccounts.length < 5
+        ? "pointer"
+        : "not-allowed",
     transition: "all 0.3s ease",
     marginTop: "2rem",
-    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+    background:
+      !isLoading &&
+      (userDoc?.Premium || connectedAccounts.length === 0) &&
+      connectedAccounts.length < 5
+        ? "linear-gradient(135deg, #E1306C 0%, #F56040 100%)"
+        : "#9ca3af",
     color: "#ffffff",
     transform: "translateY(0)",
+    opacity: isLoading ? 0.7 : 1,
+  };
+
+  const configInfoStyle = {
+    background: "#f0f9ff",
+    border: "1px solid #0ea5e9",
+    borderRadius: "8px",
+    padding: "1rem",
+    marginBottom: "1.5rem",
+    fontSize: "0.9rem",
+    color: "#0c4a6e",
   };
 
   return (
@@ -176,131 +200,209 @@ export default function Instagram() {
             Connect Instagram
           </h1>
           <p style={subtitleStyle}>
-            Connect your Instagram account to start automating your content
-          </p>{" "}
+            Connect your Instagram accounts to start automating your content
+          </p>
           <div style={statusBadgeStyle}>
             {userDoc?.Premium
               ? "Premium Member"
-              : "Premium Required to add more accounts"}
+              : "Premium Required for multiple accounts"}
           </div>
         </div>
 
-        <div style={formGroupStyle}>
-          <label style={labelStyle}>Primary Account Email</label>
-          <input
-            type="email"
-            placeholder="Enter your Instagram email"
-            value={primaryAccount.email}
-            onChange={handlePrimaryAccountChange("email")}
-            style={inputStyle}
-            onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-            onBlur={(e) =>
-              Object.assign(e.target.style, {
-                borderColor: "#e5e7eb",
-                boxShadow: "none",
-              })
-            }
-          />
+        {/* Configuration Info */}
+        <div style={configInfoStyle}>
+          <strong>Setup Status:</strong>
+          <br />
+          App ID: {INSTAGRAM_CLIENT_ID || "1227240252211915"} (from Meta
+          Dashboard)
+          <br />
+          Redirect URI: {REDIRECT_URI}
+          <br />
+          <small>
+            Make sure this redirect URI is added to your Meta app settings.
+          </small>
         </div>
 
-        <div style={formGroupStyle}>
-          <label style={labelStyle}>Primary Account Password</label>
-          <input
-            type="password"
-            placeholder="Enter your Instagram password"
-            value={primaryAccount.password}
-            onChange={handlePrimaryAccountChange("password")}
-            style={inputStyle}
-            onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-            onBlur={(e) =>
-              Object.assign(e.target.style, {
-                borderColor: "#e5e7eb",
-                boxShadow: "none",
-              })
-            }
-          />
-        </div>
-
-        {accounts.map((acc, idx) => (
-          <div key={idx} style={accountCardStyle}>
-            <div style={accountNumberStyle}>Account {idx + 2}</div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={labelStyle}>Email</label>
-              <input
-                type="email"
-                placeholder="Enter email for additional account"
-                value={acc.email}
-                onChange={handleAccountChange(idx, "email")}
-                style={inputStyle}
-                onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                onBlur={(e) =>
-                  Object.assign(e.target.style, {
-                    borderColor: "#e5e7eb",
-                    boxShadow: "none",
-                  })
-                }
-              />
-            </div>
-
-            <div>
-              <label style={labelStyle}>Password</label>
-              <input
-                type="password"
-                placeholder="Enter password for additional account"
-                value={acc.password}
-                onChange={handleAccountChange(idx, "password")}
-                style={inputStyle}
-                onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                onBlur={(e) =>
-                  Object.assign(e.target.style, {
-                    borderColor: "#e5e7eb",
-                    boxShadow: "none",
-                  })
-                }
-              />
-            </div>
+        {/* Connected Accounts */}
+        {connectedAccounts.length > 0 && (
+          <div style={{ marginBottom: "2rem" }}>
+            <h3 style={{ marginBottom: "1rem", color: "#374151" }}>
+              Connected Accounts ({connectedAccounts.length}/5)
+            </h3>
+            {connectedAccounts.map((account, index) => (
+              <div key={account.id} style={accountCardStyle}>
+                <div style={accountNumberStyle}>Account {index + 1}</div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <div>
+                    <strong style={{ color: "#374151" }}>
+                      {account.accountName || account.username}
+                    </strong>
+                    <p
+                      style={{
+                        color: "#64748b",
+                        fontSize: "0.9rem",
+                        margin: "0.25rem 0 0 0",
+                      }}
+                    >
+                      Connected:{" "}
+                      {new Date(account.connectedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleDisconnectAccount(account.id)}
+                    disabled={isLoading}
+                    style={{
+                      padding: "0.5rem 1rem",
+                      backgroundColor: "#ef4444",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: isLoading ? "not-allowed" : "pointer",
+                      fontSize: "0.875rem",
+                      fontWeight: "500",
+                      opacity: isLoading ? 0.7 : 1,
+                    }}
+                  >
+                    {isLoading ? "..." : "Disconnect"}
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
 
-        <button
-          onClick={handleAdd}
-          disabled={isLoading || !userDoc?.Premium || accounts.length >= 4}
-          style={buttonStyle}
-          onMouseEnter={(e) => {
-            if (userDoc?.Premium && accounts.length < 4) {
-              e.target.style.transform = "translateY(-2px)";
-              e.target.style.boxShadow = "0 10px 20px rgba(102, 126, 234, 0.3)";
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = "translateY(0)";
-            e.target.style.boxShadow = "none";
+        {/* Instructions */}
+        <div
+          style={{
+            background: "#f0f9ff",
+            border: "1px solid #0ea5e9",
+            borderRadius: "8px",
+            padding: "1rem",
+            marginBottom: "1.5rem",
+            fontSize: "0.9rem",
+            color: "#0c4a6e",
           }}
         >
-          {userDoc?.Premium
-            ? accounts.length < 4
-              ? `+ Add Account ${accounts.length + 2} (${
-                  4 - accounts.length
-                } remaining)`
-              : "Maximum accounts reached (4/4)"
-            : "Add more accounts"}
-        </button>
+          <strong>How it works:</strong>
+          <ul style={{ margin: "0.5rem 0 0 1rem", paddingLeft: "1rem" }}>
+            <li>Click "Connect" to authenticate with Instagram</li>
+            <li>You'll be redirected to Instagram's secure login</li>
+            <li>Grant permissions to manage your content</li>
+            <li>Your account will be securely linked for auto-posting</li>
+            <li>
+              {userDoc?.Premium
+                ? "Premium users can connect up to 5 accounts"
+                : "Free users can connect 1 account"}
+            </li>
+          </ul>
+        </div>
 
+        {/* Connect New Account Button */}
         <button
+          onClick={handleConnectInstagram}
+          disabled={
+            isLoading ||
+            (!userDoc?.Premium && connectedAccounts.length >= 1) ||
+            connectedAccounts.length >= 5
+          }
           style={connectButtonStyle}
           onMouseEnter={(e) => {
-            e.target.style.transform = "translateY(-2px)";
-            e.target.style.boxShadow = "0 10px 20px rgba(16, 185, 129, 0.3)";
+            if (e.target.style.cursor === "pointer") {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 10px 20px rgba(225, 48, 108, 0.3)";
+            }
           }}
           onMouseLeave={(e) => {
             e.target.style.transform = "translateY(0)";
             e.target.style.boxShadow = "none";
           }}
         >
-          Connect All Accounts
+          {connectedAccounts.length >= 5
+            ? "Maximum accounts reached (5/5)"
+            : !userDoc?.Premium && connectedAccounts.length >= 1
+            ? "Premium required for more accounts"
+            : isLoading
+            ? "Connecting..."
+            : `+ Connect Instagram Account (${connectedAccounts.length}/5)`}
         </button>
+
+        {/* Setup Instructions */}
+        <div
+          style={{
+            marginTop: "2rem",
+            padding: "1rem",
+            background: "#f9fafb",
+            borderRadius: "8px",
+            fontSize: "0.875rem",
+            color: "#374151",
+          }}
+        >
+          <strong>Meta Developer Setup Checklist:</strong>
+          <ol style={{ margin: "0.5rem 0 0 1rem", paddingLeft: "1rem" }}>
+            <li>✅ App created in Meta for Developers</li>
+            <li>✅ Instagram product added to your app</li>
+            <li>
+              📝 Add redirect URI:{" "}
+              <code
+                style={{
+                  background: "#e5e7eb",
+                  padding: "0.125rem 0.25rem",
+                  borderRadius: "4px",
+                }}
+              >
+                {REDIRECT_URI}
+              </code>
+            </li>
+            <li>
+              📝 Set environment variable:
+              VITE_INSTAGRAM_CLIENT_ID=1227240252211915
+            </li>
+            <li>📝 Complete app review process for production</li>
+          </ol>
+        </div>
       </div>
     </div>
   );
+}
+
+// Helper functions (implement these based on your database structure)
+async function getConnectedAccounts(userId, platform) {
+  try {
+    // Replace with your actual database call
+    // Example with Appwrite:
+    // const response = await databases.listDocuments(
+    //   "your_database_id",
+    //   "connected_accounts_collection_id",
+    //   [Query.equal("userId", userId), Query.equal("platform", platform)]
+    // );
+    // return response.documents;
+
+    return []; // Placeholder - return array of connected accounts
+  } catch (error) {
+    console.error("Failed to get connected accounts:", error);
+    return [];
+  }
+}
+
+async function disconnectAccount(accountId) {
+  try {
+    // Replace with your actual database call to remove/deactivate account
+    // Example with Appwrite:
+    // await databases.deleteDocument(
+    //   "your_database_id",
+    //   "connected_accounts_collection_id",
+    //   accountId
+    // );
+
+    console.log("Disconnecting account:", accountId);
+  } catch (error) {
+    console.error("Failed to disconnect account:", error);
+    throw error;
+  }
 }
