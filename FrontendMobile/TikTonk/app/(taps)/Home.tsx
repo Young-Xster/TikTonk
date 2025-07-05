@@ -1,4 +1,6 @@
-import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native'
+import { View, Text, ScrollView, Image, TouchableOpacity, Alert } from 'react-native'
+import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from 'expo-file-system';
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import PostsDisplayer from "../../components/PostsDisplayer"
@@ -47,6 +49,74 @@ const Home = () => {
 
     fetchBackgrounds();
   }, []);
+
+  const handleCreateVideo = async () => {
+  if (SelectedBackground === "None" || SelectedSource === "None") {
+    Alert.alert("Error", "Please select both a source and background");
+    return;
+  }
+  try {
+    const durationInMinutes = parseInt(selectedDuration.replace('min', ''));
+    const durationInSeconds = durationInMinutes * 60;
+
+    const response = await fetch('http://192.168.1.103:5000/create_video', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        bg_video: SelectedBackground,
+        font_path: "Bangers-Regular.ttf",
+        duration: durationInSeconds,
+        gen: SelectedSource
+      }),
+    });
+
+    if (response.ok) {
+      // The response is the video file itself. We need to save it.
+      const blob = await response.blob();
+      
+      // We will read the blob as a base64 string to save it to a file.
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+
+      reader.onloadend = async () => {
+        if (!reader.result) {
+          throw new Error('Failed to read file');
+        }
+        if (typeof reader.result !== 'string') {
+          throw new Error('Unexpected result type');
+        }
+        const base64data = reader.result.split(',')[1]; // Get only the base64 content
+        
+        // Define a path in the app's document directory
+        const fileUri = FileSystem.documentDirectory + `video_${Date.now()}.mp4`;
+
+        // Write the base64 data to the new file
+        await FileSystem.writeAsStringAsync(fileUri, base64data, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        // Now, save the local file to the Media Library
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status === "granted") {
+          const asset = await MediaLibrary.createAssetAsync(fileUri);
+          await MediaLibrary.createAlbumAsync("TikTonk", asset, false);
+          Alert.alert("Success", "Video downloaded successfully!");
+        } else {
+          Alert.alert("Error", "Permission to save video was denied");
+        }
+      };
+
+    } else {
+      const errorData = await response.json(); // If response is not ok, expect a JSON error
+      Alert.alert("Error", errorData.error || "Failed to create video");
+    }
+  } catch (error) {
+    console.error('Error creating video:', error);
+    Alert.alert("Error", "Failed to connect to the server or process video");
+  }
+};
 
   return (
     <PostContext.Provider value={{
@@ -118,7 +188,11 @@ const Home = () => {
             showTimePicker={showTimePicker}
             setShowTimePicker={setShowTimePicker}
           />
-          <Button1 title='Done' onPress={()=>{}} className='mt-28'/>
+          <Button1 
+            title='Done' 
+            onPress={handleCreateVideo} 
+            className='mt-28'
+          />
         </ScrollView>
       </SafeAreaView>
     </PostContext.Provider>

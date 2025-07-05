@@ -1,0 +1,51 @@
+# Build directories
+android/build/
+android/app/build/
+ios/build/
+
+# Node modules (they will be reinstalled during build)
+node_modules/
+
+# Various IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+*.log
+
+# Temporary files
+*.tmp
+temp/
+tmp/
+
+# Development files
+__tests__/
+*.test.js
+*.spec.js
+
+# Source maps
+*.map
+
+# Debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (if you have any)
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Documentation
+docs/
+*.md
+
+# Git files
+.git/
+.gitignore
+
+# Cache directories
+.cache/
+.expo/
+web-build/
+dist/
