@@ -33,7 +33,6 @@ const VideoItem: React.FC<VideoItemProps> = ({ url, likes, views, comments, shar
 
 const AccountDetails = () => {
   const { name } = useLocalSearchParams();
-
   return (
     <ScrollView className="flex-1 bg-white">
       {/* Profile Header */}

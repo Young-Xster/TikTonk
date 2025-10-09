@@ -10,7 +10,7 @@ interface ButtonProps {
 const Button2 = ({ title, onPress, className }: ButtonProps) => {
   return (
     <TouchableOpacity 
-      className={`w-full h-[50px] border-t-[1px] rounded-lg justify-center items-center my-2 ${className || ''}`} 
+      className={`w-full h-[50px] border-b-[1px] rounded-lg justify-center items-center my-2 ${className || ''}`} 
       onPress={onPress}
     >
       <Text className="text-green-400 text-2xl font-semibold italic ">

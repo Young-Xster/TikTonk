@@ -5,9 +5,27 @@ import { platforms } from '../constants/images';
 interface PlatformSelectorProps {
   selectedPlatforms: string[];
   setSelectedPlatforms: (callback: (prev: string[]) => string[]) => void;
+  onRestrictedPlatformPress?: (platformId: string, platformName: string) => void;
 }
 
-const PlatformSelector = ({ selectedPlatforms, setSelectedPlatforms }: PlatformSelectorProps) => {
+const PlatformSelector = ({ selectedPlatforms, setSelectedPlatforms, onRestrictedPlatformPress }: PlatformSelectorProps) => {
+  const restrictedPlatforms = ['instagram', 'shorts']; // Define restricted platforms
+
+  const handlePlatformPress = (platform: any) => {
+    // Check if platform is restricted
+    if (restrictedPlatforms.includes(platform.id)) {
+      onRestrictedPlatformPress?.(platform.id, platform.name);
+      return;
+    }
+
+    // Handle normal platform selection
+    setSelectedPlatforms(prev => 
+      prev.includes(platform.id)
+        ? prev.filter(id => id !== platform.id)
+        : [...prev, platform.id]
+    );
+  };
+
   return (
     <View className='mx-5 mt-8'>
       <Text className='text-[21px] font-bold mb-4 text-gray-800'>Platform</Text>
@@ -15,13 +33,7 @@ const PlatformSelector = ({ selectedPlatforms, setSelectedPlatforms }: PlatformS
         {platforms.map((platform) => (
           <TouchableOpacity
             key={platform.id}
-            onPress={() => {
-              setSelectedPlatforms(prev => 
-                prev.includes(platform.id)
-                  ? prev.filter(id => id !== platform.id)
-                  : [...prev, platform.id]
-              )
-            }}
+            onPress={() => handlePlatformPress(platform)}
             className='items-center'
           >
             <View 

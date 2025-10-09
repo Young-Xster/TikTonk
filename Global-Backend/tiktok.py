@@ -68,7 +68,7 @@ def upload_video(session_user, video, title, schedule_time=0, allow_comment=1, a
 	
 	print("Uploading video...")
 	# Parameter validation,
-	if schedule_time and (schedule_time > 864000 or schedule_time < 900):
+	if schedule_time and (schedule_time > 864000):
 		print("[-] Cannot schedule video in more than 10 days or less than 20 minutes")
 		return False
 	if len(title) > 2200:

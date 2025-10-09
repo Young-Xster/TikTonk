@@ -1,4 +1,4 @@
-import { Account, Client, Databases, ID, Storage } from "appwrite";
+import { Account, Client, Databases, ID, Storage, Query } from "appwrite";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const client = new Client()
     .setEndpoint('https://fra.cloud.appwrite.io/v1')
@@ -36,7 +36,7 @@ export async function getCurrentUser() {
     try {
         return await account.get();
     } catch (error) {
-        // console.error("Failed to get current user:", error);
+        console.error("Failed to get current user:", error);
         return null; // Return null if no user is logged in or an error occurs
     }
 }
@@ -97,6 +97,8 @@ export async function logout() {
 export async function login(email, password) { 
     try {
         const session = await account. createEmailPasswordSession(email, password);
+        console.log("Login session:", session);
+        console.log("User ID:", (await account.get()).$id);
         await AsyncStorage.setItem('user', JSON.stringify(session));
         return session; 
     } catch (error) {
@@ -129,5 +131,72 @@ export async function fetchUser() {
     } catch (error) {
         console.error("Failed to fetch user:", error);
         return null;
+    }
+}
+
+export async function getUserDocument() {
+    try {
+        const userSession = await AsyncStorage.getItem("user");
+        const userId = JSON.parse(userSession).userId;
+        // Use listDocuments with a query to filter by UserId
+        const documents = await databases.listDocuments(
+            '683aed5d0031dc5b8244',
+            '683b198000065ced36ab',
+            [
+                // Appwrite query for equality
+                Query.equal('UserId', userId)
+            ]
+        );
+        // Return the first matching document or null
+        return documents.documents.length > 0 ? documents.documents[0] : null;
+    } catch (error) {
+        console.error("Failed to get user document:", error);
+        throw error;
+    }
+}
+
+export async function createUploadDocument(dateString){
+    try {
+        const userSession = await AsyncStorage.getItem("user");
+        const userId = JSON.parse(userSession).userId;
+        const existingDocuments = await databases.listDocuments(
+            '683aed5d0031dc5b8244',
+            'upload',
+            [
+                Query.equal('Userid', userId),
+                Query.equal('Date', dateString)
+            ]
+        );
+        if (existingDocuments.documents.length > 0) {
+            if (existingDocuments.documents[0].NbVideos >= 3){
+                const userDocument = await getUserDocument();
+                if (!userDocument.Premium){
+                    return null;
+                }
+            }
+            if (existingDocuments.documents[0].NbVideos >= 10){
+                return null;
+            }
+            // Document already exists for this user and date
+            existingDocuments.documents[0].NbVideos += 1;
+            const updatedDocument = await databases.updateDocument(
+                '683aed5d0031dc5b8244',
+                'upload',
+                existingDocuments.documents[0].$id,
+                { NbVideos: existingDocuments.documents[0].NbVideos }
+            );
+            return updatedDocument;
+        }
+        const document = await databases.createDocument(
+            '683aed5d0031dc5b8244',
+            'upload',
+            ID.unique(),
+            {Userid: userId, Date: dateString, NbVideos: 0}
+        );
+        return document;
+    }
+    catch (error) {
+        console.error("Failed to create or update upload document:", error);
+        throw error;
     }
 }

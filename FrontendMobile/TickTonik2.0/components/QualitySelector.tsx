@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
 
 interface QualitySelectorProps {
@@ -10,23 +10,23 @@ const qualities = ["360p", "480p", "720p", "1080p"];
 
 const QualitySelector = ({ selectedQuality, setSelectedQuality }: QualitySelectorProps) => {
   return (
-    <View className='mx-5 mt-8'>
-      <Text className='text-[21px] font-bold mb-4 text-gray-800'>Quality</Text>
-      <View className='bg-gray-50 rounded-[35px] h-14 flex-row items-center justify-between px-3 my-2 border-gray-100'>
+    <View className='mx-5 mb-6'>
+      <Text className='text-[18px] font-semibold mb-3 text-gray-700'>Video Quality</Text>
+      <View style={styles.container}>
         {qualities.map((quality) => (
           <TouchableOpacity
             key={quality}
             onPress={() => setSelectedQuality(quality.slice(0, -1))}
-            className={`px-5 py-2 rounded-[25px] ${
-              selectedQuality === quality.slice(0, -1) ? 'bg-white border border-gray-100' : ''
-            }`}
+            style={[
+              styles.option,
+              selectedQuality === quality.slice(0, -1) && styles.selectedOption
+            ]}
           >
             <Text
-              className={`${
-                selectedQuality === quality.slice(0, -1)
-                  ? 'text-blue-500 font-bold'
-                  : 'text-gray-400 font-medium'
-              }`}
+              style={[
+                styles.optionText,
+                selectedQuality === quality.slice(0, -1) && styles.selectedOptionText
+              ]}
             >
               {quality}
             </Text>
@@ -36,5 +36,46 @@ const QualitySelector = ({ selectedQuality, setSelectedQuality }: QualitySelecto
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 20,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+    marginVertical: 4,
+  },
+  option: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: 2,
+  },
+  selectedOption: {
+    backgroundColor: 'white',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 1.00,
+    elevation: 1,
+  },
+  optionText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6B7280',
+  },
+  selectedOptionText: {
+    color: '#2C9814',
+    fontWeight: '700',
+  }
+});
 
 export default QualitySelector;
