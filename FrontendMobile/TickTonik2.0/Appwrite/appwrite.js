@@ -99,6 +99,8 @@ export async function login(email, password) {
         const session = await account. createEmailPasswordSession(email, password);
         console.log("Login session:", session);
         console.log("User ID:", (await account.get()).$id);
+        await AsyncStorage.setItem('userId', (await account.get()).$id);
+
         await AsyncStorage.setItem('user', JSON.stringify(session));
         return session; 
     } catch (error) {

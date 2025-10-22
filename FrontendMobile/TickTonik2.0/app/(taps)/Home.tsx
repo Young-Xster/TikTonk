@@ -155,8 +155,8 @@ const Home = () => {
       const tikTokSession = JSON.parse(tikTokSessionStr);
       const uploadDoc = await createUploadDocument(moment().format('YYYYMMDD'));
       setNbVideos(uploadDoc ? uploadDoc.NbVideos : 0);
-      if(uploadDoc != null){
-        const resp = await fetch('http://172.21.210.79:5000/create_video', {
+      if(uploadDoc == null){
+        const resp = await fetch('http://172.19.35.165:5000/create_video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -170,8 +170,9 @@ const Home = () => {
           dc_id: tikTokSession.dc_id,
           title: title,
           // schedule: Math.max(0, Math.floor((moment(selectedDate).valueOf() - Date.now()) / 1000)),
-          schedule: selectedDate,
-
+          schedule: moment(selectedDate).format('YYYY/MM/DD|HH:mm'),
+          platform: String(selectedPlatforms),
+          userId: await AsyncStorage.getItem('userId')
         }),
       });
       }else{

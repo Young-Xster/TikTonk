@@ -2,6 +2,7 @@ import moviepy as mpe
 from moviepy.video.fx import *
 import captacity
 import os
+from appwrite_func import *
 import yt_dlp
 import numpy as np
 import random
@@ -20,7 +21,6 @@ import functools
 import threading
 import queue
 import sys
-
 # Set UTF-8 encoding for Windows compatibility
 if sys.platform.startswith('win'):
     try:
@@ -159,7 +159,48 @@ def periodic_cleanup():
     while queue_worker_running:
         time.sleep(1800)  # Clean up every 30 minutes
         cleanup_old_tasks()
-
+def periodic_sckeduled_video_check():
+    while queue_worker_running:
+        time.sleep(300)  # Check every 10 seconds
+        scheduled_videos = get_scheduled_videos()
+        print(scheduled_videos)
+        
+        if scheduled_videos.get('total', 0) > 0:
+            for video in scheduled_videos.get('documents', []):
+                if upload_time(video['scheduled_time']):
+                    continue
+                else:
+                    try:
+                        task = {
+                            'task_id': str(uuid.uuid4()),
+                            'type': 'create_video',
+                            'data': {
+                                'bg_video': video['bg_video'],
+                                'font_path': video['font_path'],
+                                'duration': video['duration'],
+                                'gen': video['gen'],
+                                'quality': video['quality'],
+                                'platform': video['platform'],
+                                'userId': video['userId'],
+                                'sessionid': video['sessionid'],
+                                'dc_id': video['dc_id'],
+                                'login_name': video['login_name'],
+                                'title': video['title'],
+                                'schedule': video['scheduled_time']
+                            },
+                            'created_at': datetime.now().isoformat()
+                        }
+                        task_queue.put(task)
+                        
+                        # Delete the scheduled video from database after queuing it
+                        delete_scheduled_video(video['$id'])
+                        logger.info(f"Scheduled video {video['$id']} queued for processing and removed from database")
+                        
+                    except Exception as e:
+                        logger.error(f"Error processing scheduled video {video.get('$id', 'unknown')}: {str(e)}")
+                    
+video_chek_thread = threading.Thread(target=periodic_sckeduled_video_check, daemon=True)
+video_chek_thread.start()                    
 cleanup_thread = threading.Thread(target=periodic_cleanup, daemon=True)
 cleanup_thread.start()
 
@@ -544,13 +585,40 @@ def process_create_video_task(task):
         dc_id = data.get('dc_id')
         login_name = data.get('login_name')
         title = data.get('title', '')
-        schedule = data.get('schedule', 0)
-        
+        schedule = data.get('schedule')
+        schedule_YYYY_MM_DD = schedule.split("|")[0]
+        schedule_HH_MM = schedule.split("|")[1]
+        current_YYYY_MM_DD = datetime.now().strftime("%Y/%m/%d")
+        current_HH_MM = datetime.now().strftime("%H:%M")
+        userId = data.get('userId')
+        platform = data.get('platform')
         if not all([bg_video, duration, gen]):
             return {'success': False, 'error': 'Missing required parameters'}
-
+        if upload_time(schedule):
+            if not userId:
+                print("userId is required for scheduled videos:",userId)
+                return {'success': False, 'error': 'userId is required for scheduled videos'}
+            video_data = {
+                'sessionid': sessionid,
+                'dc_id': dc_id,
+                'login_name': login_name,
+                'title': title,
+                'scheduled_time': schedule,
+                'userId': userId,
+                'bg_video': bg_video,
+                'font_path': font_path,
+                'duration': duration,
+                'gen': gen,
+                'quality': quality,
+                'platform': platform
+                
+            }
+            add_scheduled_video(video_data)
+            return {
+                'success': True,
+                'message': 'Video scheduled successfully for future upload'
+            }
         # Create video
-        
         video_path = create_video(bg_video, font_path, duration, gen, quality, task_id,schedule)
         
         # Upload if credentials provided
@@ -566,7 +634,7 @@ def process_create_video_task(task):
                 session_user=login_name,
                 video=video_path,
                 title=title,
-                schedule_time= -int(schedule)
+                schedule_time= 0
             )
             
             if success:
@@ -628,7 +696,7 @@ def process_upload_task(task):
             session_user=login_name,
             video=video_path,
             title=title,
-            schedule_time=schedule
+            schedule_time= 0
         )
 
         if success:
@@ -645,6 +713,26 @@ def process_upload_task(task):
     except Exception as e:
         logger.error(f"Error in process_upload_task: {str(e)}", exc_info=True)
         return {'success': False, 'error': str(e)}
+
+
+def upload_time(schedule):
+    """Return True if the video is scheduled for future upload"""
+    try:
+        schedule_YYYY_MM_DD = schedule.split("|")[0]
+        schedule_HH_MM = schedule.split("|")[1]
+        current_YYYY_MM_DD = datetime.now().strftime("%Y/%m/%d")
+        current_HH_MM = datetime.now().strftime("%H:%M")
+        
+        if schedule_YYYY_MM_DD > current_YYYY_MM_DD:
+            return True
+        elif schedule_YYYY_MM_DD == current_YYYY_MM_DD and schedule_HH_MM > current_HH_MM:
+            return True
+        else:
+            return False
+    except Exception as e:
+        logger.error(f"Error in upload_time: {str(e)}")
+        return False
+    
 
 @app.route('/create_video', methods=['POST'])
 @validate_json()
